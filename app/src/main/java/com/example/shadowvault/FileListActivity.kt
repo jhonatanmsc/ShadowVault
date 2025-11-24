@@ -39,7 +39,7 @@ class FileListActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = MyAdapter(
-            applicationContext,
+            this,
             filesAndFolders
         )
     }

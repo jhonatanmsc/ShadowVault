@@ -1,12 +1,15 @@
 package com.example.shadowvault
 
-import android.content.Context
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
@@ -15,12 +18,12 @@ import androidx.recyclerview.widget.RecyclerView
 import java.io.File
 
 class MyAdapter(
-    private val context: Context,
+    private val activity: Activity,
     private var filesAndFolders: Array<File>
 ) : RecyclerView.Adapter<MyAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(context)
+        val view = LayoutInflater.from(activity)
             .inflate(R.layout.recycler_item, parent, false)
         return ViewHolder(view)
     }
@@ -39,26 +42,27 @@ class MyAdapter(
         // OnClick → open file or load new directory
         holder.itemView.setOnClickListener {
             if (selectedFile.isDirectory) {
-                val intent = Intent(context, FileListActivity::class.java)
+                val intent = Intent(activity, FileListActivity::class.java)
                 intent.putExtra("path", selectedFile.absolutePath)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                context.startActivity(intent)
+                activity.startActivity(intent)
             } else {
                 try {
                     val intent = Intent(Intent.ACTION_VIEW)
                     val type = "image/*"
                     intent.setDataAndType(Uri.parse(selectedFile.absolutePath), type)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(intent)
+                    activity.startActivity(intent)
                 } catch (e: Exception) {
-                    Toast.makeText(context, "Cannot open the file", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(activity, "Cannot open the file", Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
         // LongClick → popup menu
         holder.itemView.setOnLongClickListener { v ->
-            val popupMenu = PopupMenu(context, v)
+            val themedContext = ContextThemeWrapper(activity, R.style.CustomPopupMenu)
+            val popupMenu = PopupMenu(themedContext, v)
             popupMenu.menu.add("DELETE")
             popupMenu.menu.add("MOVE")
             popupMenu.menu.add("RENAME")
@@ -68,17 +72,44 @@ class MyAdapter(
                     "DELETE" -> {
                         val deleted = selectedFile.delete()
                         if (deleted) {
-                            Toast.makeText(context, "DELETED", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(activity, "DELETED", Toast.LENGTH_SHORT).show()
                             v.visibility = View.GONE
                         }
                     }
 
                     "MOVE" -> {
-                        Toast.makeText(context, "MOVED", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(activity, "MOVED", Toast.LENGTH_SHORT).show()
                     }
 
                     "RENAME" -> {
-                        Toast.makeText(context, "RENAME", Toast.LENGTH_SHORT).show()
+                        val editText = EditText(activity)
+                        editText.setText(selectedFile.name)
+
+                        AlertDialog.Builder(activity)
+                            .setTitle("Rename File")
+                            .setView(editText)
+                            .setPositiveButton("Rename") { _, _ ->
+                                val newName = editText.text.toString().trim()
+
+                                if (newName.isNotEmpty()) {
+                                    val newFile = File(selectedFile.parent, newName)
+
+                                    val renamed = selectedFile.renameTo(newFile)
+
+                                    if (renamed) {
+                                        Toast.makeText(activity, "Renamed", Toast.LENGTH_SHORT).show()
+
+                                        // Update your list and notify the adapter
+                                        filesAndFolders[position] = newFile
+                                        notifyItemChanged(position)
+
+                                    } else {
+                                        Toast.makeText(activity, "Rename failed", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                            .setNegativeButton("Cancel", null)
+                            .show()
                     }
                 }
                 true

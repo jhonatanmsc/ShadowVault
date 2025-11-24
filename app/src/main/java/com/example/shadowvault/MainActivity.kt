@@ -33,7 +33,6 @@ class MainActivity : AppCompatActivity() {
         storageBtn.setOnClickListener {
 
             if (checkPermission()) {
-                Toast.makeText(this, "CLICK!", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, FileListActivity::class.java)
                 val path: String = Environment.getExternalStorageDirectory().path
                 intent.putExtra("path", path)
