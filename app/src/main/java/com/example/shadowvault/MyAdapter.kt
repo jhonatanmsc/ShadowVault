@@ -16,6 +16,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
+import androidx.core.net.toUri
 
 class MyAdapter(
     private val activity: Activity,
@@ -50,7 +51,7 @@ class MyAdapter(
                 try {
                     val intent = Intent(Intent.ACTION_VIEW)
                     val type = "image/*"
-                    intent.setDataAndType(Uri.parse(selectedFile.absolutePath), type)
+                    intent.setDataAndType(selectedFile.absolutePath.toUri(), type)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     activity.startActivity(intent)
                 } catch (e: Exception) {

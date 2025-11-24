@@ -30,7 +30,7 @@ class FileListActivity : AppCompatActivity() {
         val root = File(path)
         val filesAndFolders: Array<File> = root.listFiles()
 
-        if (filesAndFolders==null || filesAndFolders.isEmpty()) {
+        if (filesAndFolders.isEmpty()) {
             noFilesText.visibility = View.VISIBLE
             return
         }
