@@ -2,13 +2,14 @@ package com.example.shadowvault
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.PopupMenu
@@ -86,7 +87,7 @@ class MyAdapter(
                         val editText = EditText(activity)
                         editText.setText(selectedFile.name)
 
-                        AlertDialog.Builder(activity)
+                        val dialog = AlertDialog.Builder(activity)
                             .setTitle("Rename File")
                             .setView(editText)
                             .setPositiveButton("Rename") { _, _ ->
@@ -110,7 +111,16 @@ class MyAdapter(
                                 }
                             }
                             .setNegativeButton("Cancel", null)
-                            .show()
+                            .create()
+
+                        dialog.setOnShowListener {
+                            editText.requestFocus()
+                            editText.selectAll()
+                            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                            imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+                        }
+
+                        dialog.show()
                     }
                 }
                 true
