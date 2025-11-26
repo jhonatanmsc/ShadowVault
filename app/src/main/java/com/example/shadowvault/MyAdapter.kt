@@ -56,10 +56,13 @@ class MyAdapter(
             holder.dateTextView.text = formatDate(selectedFile.lastModified())
             val ext = selectedFile.extension.lowercase(Locale.getDefault())
             val textExtensions = setOf("txt", "md", "log", "csv", "json", "xml", "html", "htm", "yaml", "yml", "properties")
+            val audioExtentions = setOf("mp3", "wav", "flac", "aac", "ogg", "m4a")
             if (ext in textExtensions) {
                 holder.imageView.setImageResource(R.drawable.baseline_description_24)
             } else if (ext == "pdf") {
                 holder.imageView.setImageResource(R.drawable.baseline_article_24)
+            } else if (ext in audioExtentions) {
+                holder.imageView.setImageResource(R.drawable.baseline_music_note_24)
             } else {
                 holder.imageView.setImageResource(R.drawable.baseline_insert_drive_file_24)
             }
