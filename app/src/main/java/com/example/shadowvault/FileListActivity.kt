@@ -9,6 +9,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.io.File
 
 class FileListActivity : AppCompatActivity() {
@@ -22,6 +23,17 @@ class FileListActivity : AppCompatActivity() {
             insets
         }
 
+        val swipe = findViewById<SwipeRefreshLayout>(R.id.swipe_refresh)
+
+        swipe.setOnRefreshListener {
+            reloadData()
+            swipe.isRefreshing = false
+        }
+
+        reloadData()
+    }
+
+    private fun reloadData() {
         val recyclerView: RecyclerView = findViewById(R.id.recycler_view)
         val noFilesText: TextView = findViewById(R.id.nofiles_textview)
 
