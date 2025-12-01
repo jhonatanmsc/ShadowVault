@@ -28,6 +28,9 @@ class MyAdapter(
     private var filesAndFolders: Array<File>
 ) : RecyclerView.Adapter<MyAdapter.ViewHolder>() {
 
+    private val selectedItems = mutableSetOf<File>()
+    var onSelectionChanged: ((Int) -> Unit)? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(activity)
             .inflate(R.layout.recycler_item, parent, false)
@@ -69,12 +72,14 @@ class MyAdapter(
 
         }
 
-        // OnClick → open file or load new directory
         holder.itemView.setOnClickListener { v ->
-            // Desabilita temporariamente para evitar múltiplos cliques
+            if (selectedItems.isNotEmpty()) {
+                toggleSelection(selectedFile)
+                return@setOnClickListener
+            }
+
             v.isEnabled = false
 
-            // Delay curto para permitir o ripple ser visível
             v.postDelayed({
                 v.isEnabled = true
 
@@ -98,73 +103,100 @@ class MyAdapter(
         }
 
         // LongClick → popup menu
-        holder.itemView.setOnLongClickListener { v ->
-            val themedContext = ContextThemeWrapper(activity, R.style.CustomPopupMenu)
-            val popupMenu = PopupMenu(themedContext, v)
-            popupMenu.menu.add("DELETE")
-            popupMenu.menu.add("MOVE")
-            popupMenu.menu.add("RENAME")
-
-            popupMenu.setOnMenuItemClickListener { item: MenuItem ->
-                when (item.title) {
-                    "DELETE" -> {
-                        val deleted = selectedFile.delete()
-                        if (deleted) {
-                            Toast.makeText(activity, "DELETED", Toast.LENGTH_SHORT).show()
-                            v.visibility = View.GONE
-                        }
-                    }
-
-                    "MOVE" -> {
-                        Toast.makeText(activity, "MOVED", Toast.LENGTH_SHORT).show()
-                    }
-
-                    "RENAME" -> {
-                        val editText = EditText(activity)
-                        editText.setText(selectedFile.name)
-
-                        val dialog = AlertDialog.Builder(activity)
-                            .setTitle("Rename File")
-                            .setView(editText)
-                            .setPositiveButton("Rename") { _, _ ->
-                                val newName = editText.text.toString().trim()
-
-                                if (newName.isNotEmpty()) {
-                                    val newFile = File(selectedFile.parent, newName)
-
-                                    val renamed = selectedFile.renameTo(newFile)
-
-                                    if (renamed) {
-                                        Toast.makeText(activity, "Renamed", Toast.LENGTH_SHORT).show()
-
-                                        // Update your list and notify the adapter
-                                        filesAndFolders[position] = newFile
-                                        notifyItemChanged(position)
-
-                                    } else {
-                                        Toast.makeText(activity, "Rename failed", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            }
-                            .setNegativeButton("Cancel", null)
-                            .create()
-
-                        dialog.setOnShowListener {
-                            editText.requestFocus()
-                            editText.selectAll()
-                            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                            imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
-                        }
-
-                        dialog.show()
-                    }
-                }
-                true
-            }
-
-            popupMenu.show()
+        holder.itemView.setOnLongClickListener {
+            toggleSelection(selectedFile)
             true
         }
+//            val themedContext = ContextThemeWrapper(activity, R.style.CustomPopupMenu)
+//            val popupMenu = PopupMenu(themedContext, v)
+//            popupMenu.menu.add("DELETE")
+//            popupMenu.menu.add("MOVE")
+//            popupMenu.menu.add("RENAME")
+//
+//            popupMenu.setOnMenuItemClickListener { item: MenuItem ->
+//                when (item.title) {
+//                    "DELETE" -> {
+//                        val deleted = selectedFile.delete()
+//                        if (deleted) {
+//                            Toast.makeText(activity, "DELETED", Toast.LENGTH_SHORT).show()
+//                            v.visibility = View.GONE
+//                        }
+//                    }
+//
+//                    "MOVE" -> {
+//                        Toast.makeText(activity, "MOVED", Toast.LENGTH_SHORT).show()
+//                    }
+//
+//                    "RENAME" -> {
+//                        val editText = EditText(activity)
+//                        editText.setText(selectedFile.name)
+//
+//                        val dialog = AlertDialog.Builder(activity)
+//                            .setTitle("Rename File")
+//                            .setView(editText)
+//                            .setPositiveButton("Rename") { _, _ ->
+//                                val newName = editText.text.toString().trim()
+//
+//                                if (newName.isNotEmpty()) {
+//                                    val newFile = File(selectedFile.parent, newName)
+//
+//                                    val renamed = selectedFile.renameTo(newFile)
+//
+//                                    if (renamed) {
+//                                        Toast.makeText(activity, "Renamed", Toast.LENGTH_SHORT).show()
+//
+//                                        // Update your list and notify the adapter
+//                                        filesAndFolders[position] = newFile
+//                                        notifyItemChanged(position)
+//
+//                                    } else {
+//                                        Toast.makeText(activity, "Rename failed", Toast.LENGTH_SHORT).show()
+//                                    }
+//                                }
+//                            }
+//                            .setNegativeButton("Cancel", null)
+//                            .create()
+//
+//                        dialog.setOnShowListener {
+//                            editText.requestFocus()
+//                            editText.selectAll()
+//                            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//                            imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+//                        }
+//
+//                        dialog.show()
+//                    }
+//                }
+//                true
+//            }
+//
+//            popupMenu.show()
+//            true
+//        }
+        if (selectedItems.contains(selectedFile)) {
+            holder.itemView.setBackgroundColor(0xFFE0F0FF.toInt()) // azul clarinho
+        } else {
+            val outValue = TypedValue()
+            if (activity.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)) {
+                holder.itemView.setBackgroundResource(outValue.resourceId)
+            }
+        }
+        if (position == filesAndFolders.size - 1) {
+            holder.divider.visibility = View.GONE
+        } else {
+            holder.divider.visibility = View.VISIBLE
+        }
+    }
+
+    private fun toggleSelection(file: File) {
+        if (selectedItems.contains(file)) {
+            selectedItems.remove(file)
+        } else {
+            selectedItems.add(file)
+        }
+        notifyDataSetChanged()
+
+        onSelectionChanged?.invoke(selectedItems.size)
     }
 
     override fun getItemCount(): Int = filesAndFolders.size
@@ -187,6 +219,7 @@ class MyAdapter(
         val itemsTextView: TextView = itemView.findViewById(R.id.file_items_text_view)
         val dateTextView: TextView = itemView.findViewById(R.id.file_date_text_view)
         val imageView: ImageView = itemView.findViewById(R.id.icon_view)
+        val divider: View = itemView.findViewById(R.id.divider)
     }
 }
 
