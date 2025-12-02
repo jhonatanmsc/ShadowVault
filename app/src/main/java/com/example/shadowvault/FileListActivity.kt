@@ -2,6 +2,8 @@ package com.example.shadowvault
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -17,12 +19,16 @@ class FileListActivity : AppCompatActivity() {
     private lateinit var bottomTaskbar: View
     private lateinit var topTaskbar: View
     private lateinit var selectedCountText: TextView
+    private lateinit var taskbarController: TaskbarController
+    private lateinit var cancelButton: ImageButton
+    private lateinit var selectAllBtn: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_file_list)
+        cancelButton = findViewById(R.id.cancel_btn)
+        selectAllBtn = findViewById(R.id.select_all_btn)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -45,6 +51,7 @@ class FileListActivity : AppCompatActivity() {
         bottomTaskbar = findViewById(R.id.bottom_taskbar)
         topTaskbar = findViewById(R.id.top_taskbar)
         selectedCountText = findViewById(R.id.selected_count)
+        taskbarController = TaskbarController(topTaskbar, bottomTaskbar, selectedCountText)
 
         val path: String? = intent.getStringExtra("path")
 
@@ -62,55 +69,15 @@ class FileListActivity : AppCompatActivity() {
         val adapter = MyAdapter(this, filesAndFolders)
         adapter.onSelectionChanged = { count: Int ->
             if (count > 0) {
-                showTaskbar(count)
-            } else hideTaskbar()
+                taskbarController.show(count)
+            } else taskbarController.hide()
+        }
+        cancelButton.setOnClickListener {
+            adapter.clearSelection()
+        }
+        selectAllBtn.setOnClickListener {
+            adapter.selectAll()
         }
         recyclerView.adapter = adapter
-    }
-
-    fun showTaskbar(selectedCount: Int) {
-        selectedCountText.text = "$selectedCount selected"
-        if (bottomTaskbar.visibility == View.VISIBLE) return
-        bottomTaskbar.visibility = View.VISIBLE
-
-        bottomTaskbar.post {
-            bottomTaskbar.translationY = bottomTaskbar.height.toFloat()
-            bottomTaskbar.animate()
-                .translationY(0f)
-                .setDuration(250)
-                .start()
-        }
-        if (topTaskbar.visibility == View.VISIBLE) return
-//        Toast.makeText(this, "y", Toast.LENGTH_SHORT).show()
-        topTaskbar.visibility = View.VISIBLE
-
-        topTaskbar.post {
-            topTaskbar.translationY = -topTaskbar.height.toFloat()
-            topTaskbar.animate()
-                .translationY(0f)
-                .setDuration(250)
-                .start()
-        }
-    }
-
-    fun hideTaskbar() {
-        if (bottomTaskbar.visibility != View.VISIBLE) return
-
-        bottomTaskbar.animate()
-            .translationY(bottomTaskbar.height.toFloat())
-            .setDuration(250)
-            .withEndAction {
-                bottomTaskbar.visibility = View.GONE
-            }
-            .start()
-        if (topTaskbar.visibility != View.VISIBLE) return
-
-        topTaskbar.animate()
-            .translationY(-topTaskbar.height.toFloat())
-            .setDuration(250)
-            .withEndAction {
-                topTaskbar.visibility = View.GONE
-            }
-            .start()
     }
 }

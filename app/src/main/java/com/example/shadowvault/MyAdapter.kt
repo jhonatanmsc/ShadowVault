@@ -189,12 +189,15 @@ class MyAdapter(
     }
 
     private fun toggleSelection(file: File) {
+        val index = filesAndFolders.indexOf(file)
+
         if (selectedItems.contains(file)) {
             selectedItems.remove(file)
         } else {
             selectedItems.add(file)
         }
-        notifyDataSetChanged()
+
+        if (index != -1) notifyItemChanged(index)
 
         onSelectionChanged?.invoke(selectedItems.size)
     }
@@ -212,6 +215,34 @@ class MyAdapter(
         if (timestamp <= 0L) return ""
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         return sdf.format(Date(timestamp))
+    }
+
+    fun clearSelection() {
+        val prevSelection = selectedItems.toList()
+        selectedItems.clear()
+
+        prevSelection.forEach { file ->
+            val index = filesAndFolders.indexOf(file)
+            if (index != -1) notifyItemChanged(index)
+        }
+
+        onSelectionChanged?.invoke(0)
+    }
+
+    fun selectAll() {
+        if (selectedItems.size == filesAndFolders.size) return
+        val alreadySelected = selectedItems.toSet()
+
+        selectedItems.clear()
+        selectedItems.addAll(filesAndFolders)
+
+        filesAndFolders.forEachIndexed { index, file ->
+            if (!alreadySelected.contains(file)) {
+                notifyItemChanged(index)
+            }
+        }
+
+        onSelectionChanged?.invoke(selectedItems.size)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
