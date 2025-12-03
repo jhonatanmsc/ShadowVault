@@ -22,6 +22,7 @@ class FileListActivity : AppCompatActivity() {
     private lateinit var taskbarController: TaskbarController
     private lateinit var cancelButton: ImageButton
     private lateinit var selectAllBtn: ImageButton
+    private lateinit var renameBtn: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +30,7 @@ class FileListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_file_list)
         cancelButton = findViewById(R.id.cancel_btn)
         selectAllBtn = findViewById(R.id.select_all_btn)
+        renameBtn = findViewById(R.id.rename_btn)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -69,8 +71,18 @@ class FileListActivity : AppCompatActivity() {
         val adapter = MyAdapter(this, filesAndFolders)
         adapter.onSelectionChanged = { count: Int ->
             if (count > 0) {
+                if (count > 1) {
+                    renameBtn.alpha = 0.5f
+                    renameBtn.isEnabled = false
+                } else {
+                    renameBtn.alpha = 1.0f
+                    renameBtn.isEnabled = true
+                }
                 taskbarController.show(count)
             } else taskbarController.hide()
+        }
+        renameBtn.setOnClickListener {
+            adapter.renameSelectedFile()
         }
         cancelButton.setOnClickListener {
             adapter.clearSelection()

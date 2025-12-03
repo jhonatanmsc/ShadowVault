@@ -128,43 +128,7 @@ class MyAdapter(
 //                    }
 //
 //                    "RENAME" -> {
-//                        val editText = EditText(activity)
-//                        editText.setText(selectedFile.name)
 //
-//                        val dialog = AlertDialog.Builder(activity)
-//                            .setTitle("Rename File")
-//                            .setView(editText)
-//                            .setPositiveButton("Rename") { _, _ ->
-//                                val newName = editText.text.toString().trim()
-//
-//                                if (newName.isNotEmpty()) {
-//                                    val newFile = File(selectedFile.parent, newName)
-//
-//                                    val renamed = selectedFile.renameTo(newFile)
-//
-//                                    if (renamed) {
-//                                        Toast.makeText(activity, "Renamed", Toast.LENGTH_SHORT).show()
-//
-//                                        // Update your list and notify the adapter
-//                                        filesAndFolders[position] = newFile
-//                                        notifyItemChanged(position)
-//
-//                                    } else {
-//                                        Toast.makeText(activity, "Rename failed", Toast.LENGTH_SHORT).show()
-//                                    }
-//                                }
-//                            }
-//                            .setNegativeButton("Cancel", null)
-//                            .create()
-//
-//                        dialog.setOnShowListener {
-//                            editText.requestFocus()
-//                            editText.selectAll()
-//                            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-//                            imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
-//                        }
-//
-//                        dialog.show()
 //                    }
 //                }
 //                true
@@ -227,6 +191,48 @@ class MyAdapter(
         }
 
         onSelectionChanged?.invoke(0)
+    }
+
+    fun renameSelectedFile() {
+        val selectedFile = selectedItems.firstOrNull() ?: return
+        val position = filesAndFolders.indexOf(selectedFile)
+        if (position == -1) return
+        val editText = EditText(activity)
+        editText.setText(selectedFile.name)
+
+        val dialog = AlertDialog.Builder(activity)
+            .setTitle("Rename File")
+            .setView(editText)
+            .setPositiveButton("Rename") { _, _ ->
+                val newName = editText.text.toString().trim()
+
+                if (newName.isNotEmpty()) {
+                    val newFile = File(selectedFile.parent, newName)
+
+                    val renamed = selectedFile.renameTo(newFile)
+
+                    if (renamed) {
+                        Toast.makeText(activity, "Renamed", Toast.LENGTH_SHORT).show()
+
+                        filesAndFolders[position] = newFile
+                        notifyItemChanged(position)
+
+                    } else {
+                        Toast.makeText(activity, "Rename failed", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.setOnShowListener {
+            editText.requestFocus()
+            editText.selectAll()
+            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+        }
+
+        dialog.show()
     }
 
     fun selectAll() {
