@@ -23,6 +23,7 @@ class FileListActivity : AppCompatActivity() {
     private lateinit var cancelButton: ImageButton
     private lateinit var selectAllBtn: ImageButton
     private lateinit var renameBtn: ImageButton
+    private lateinit var deleteBtn: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +32,7 @@ class FileListActivity : AppCompatActivity() {
         cancelButton = findViewById(R.id.cancel_btn)
         selectAllBtn = findViewById(R.id.select_all_btn)
         renameBtn = findViewById(R.id.rename_btn)
+        deleteBtn = findViewById(R.id.delete_btn)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -83,6 +85,9 @@ class FileListActivity : AppCompatActivity() {
         }
         renameBtn.setOnClickListener {
             adapter.renameSelectedFile()
+        }
+        deleteBtn.setOnClickListener {
+            adapter.deleteSelectedFiles()
         }
         cancelButton.setOnClickListener {
             adapter.clearSelection()

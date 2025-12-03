@@ -235,6 +235,32 @@ class MyAdapter(
         dialog.show()
     }
 
+    fun deleteSelectedFiles() {
+        val filesToDelete = selectedItems.toList()
+        val count = filesToDelete.size
+        val dialog = AlertDialog.Builder(activity)
+            .setTitle("$count items will be deleted, are you sure?")
+            .setPositiveButton("Delete") { _, _ ->
+                filesToDelete.forEach { file ->
+                    val deleted = file.delete()
+                    if (deleted) {
+                        val index = filesAndFolders.indexOf(file)
+                        if (index != -1) {
+                            filesAndFolders = filesAndFolders.filter { it != file }.toTypedArray()
+                            notifyItemRemoved(index)
+                        }
+                        selectedItems.remove(file)
+                    }
+                }
+                onSelectionChanged?.invoke(selectedItems.size)
+                Toast.makeText(activity, "$count items deleted", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+    }
+
     fun selectAll() {
         if (selectedItems.size == filesAndFolders.size) return
         val alreadySelected = selectedItems.toSet()
