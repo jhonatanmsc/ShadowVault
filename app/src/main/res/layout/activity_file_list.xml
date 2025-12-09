@@ -67,7 +67,7 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/top_taskbar"
         android:layout_above="@+id/bottom_taskbar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
