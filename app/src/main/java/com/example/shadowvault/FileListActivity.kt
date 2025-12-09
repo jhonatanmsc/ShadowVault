@@ -2,99 +2,109 @@ package com.example.shadowvault
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.shadowvault.models.FileListViewModel
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.shadowvault.factories.FileListViewModelFactory
+import kotlinx.coroutines.launch
 import java.io.File
 
 class FileListActivity : AppCompatActivity() {
-    private lateinit var bottomTaskbar: View
-    private lateinit var topTaskbar: View
-    private lateinit var selectedCountText: TextView
+
     private lateinit var taskbarController: TaskbarController
-    private lateinit var cancelButton: ImageButton
-    private lateinit var selectAllBtn: ImageButton
-    private lateinit var renameBtn: ImageButton
-    private lateinit var deleteBtn: ImageButton
+    private val viewModel: FileListViewModel by viewModels() {
+        FileListViewModelFactory(intent.getStringExtra("path")!!)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_file_list)
-        cancelButton = findViewById(R.id.cancel_btn)
-        selectAllBtn = findViewById(R.id.select_all_btn)
-        renameBtn = findViewById(R.id.rename_btn)
-        deleteBtn = findViewById(R.id.delete_btn)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        val path = intent.getStringExtra("path") ?: return
+        viewModel.load(path)
+
+        val recycler = findViewById<RecyclerView>(R.id.recycler_view)
+        val adapter = MyAdapter(viewModel, this)
+        recycler.layoutManager = LinearLayoutManager(this)
+        recycler.adapter = adapter
+
+        taskbarController = TaskbarController(
+            topTaskbar = findViewById(R.id.top_taskbar),
+            bottomTaskbar = findViewById(R.id.bottom_taskbar),
+            selectedCountText = findViewById(R.id.selected_count)
+        )
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                // observe file list
+                launch {
+                    viewModel.files.collect { list ->
+                        adapter.submitList(list)
+                        findViewById<TextView>(R.id.nofiles_textview)
+                            .visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+                    }
+                }
+
+                // observe selection
+                launch {
+                    viewModel.selected.collect { selected ->
+                        val count = selected.size
+
+                        if (count > 0) {
+                            taskbarController.show(count)
+                        } else {
+                            taskbarController.hide()
+                        }
+
+                        adapter.notifySelectionChanged(selected)
+                    }
+                }
+            }
         }
 
-        val swipe = findViewById<SwipeRefreshLayout>(R.id.swipe_refresh)
-
-        swipe.setOnRefreshListener {
-            reloadData()
-            swipe.isRefreshing = false
+        findViewById<ImageButton>(R.id.select_all_btn).setOnClickListener {
+            viewModel.selectAll()
         }
 
-        reloadData()
+        findViewById<ImageButton>(R.id.cancel_btn).setOnClickListener {
+            viewModel.clearSelection()
+        }
+
+        findViewById<ImageButton>(R.id.delete_btn).setOnClickListener {
+            viewModel.deleteSelected()
+        }
+
+        findViewById<ImageButton>(R.id.rename_btn).setOnClickListener {
+            val sel = viewModel.selected.value.firstOrNull() ?: return@setOnClickListener
+            showRenameDialog(sel)
+        }
     }
 
-    private fun reloadData() {
-        val recyclerView: RecyclerView = findViewById(R.id.recycler_view)
-        val noFilesText: TextView = findViewById(R.id.nofiles_textview)
-        bottomTaskbar = findViewById(R.id.bottom_taskbar)
-        topTaskbar = findViewById(R.id.top_taskbar)
-        selectedCountText = findViewById(R.id.selected_count)
-        taskbarController = TaskbarController(topTaskbar, bottomTaskbar, selectedCountText)
+    private fun showRenameDialog(file: File) {
+        val edit = EditText(this)
+        edit.setText(file.name)
 
-        val path: String? = intent.getStringExtra("path")
-
-        val root = File(path)
-        val filesAndFolders: Array<File> = root.listFiles()
-
-        if (filesAndFolders.isEmpty()) {
-            noFilesText.visibility = View.VISIBLE
-            return
-        }
-
-        noFilesText.visibility = View.INVISIBLE
-
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        val adapter = MyAdapter(this, filesAndFolders)
-        adapter.onSelectionChanged = { count: Int ->
-            if (count > 0) {
-                if (count > 1) {
-                    renameBtn.alpha = 0.5f
-                    renameBtn.isEnabled = false
-                } else {
-                    renameBtn.alpha = 1.0f
-                    renameBtn.isEnabled = true
-                }
-                taskbarController.show(count)
-            } else taskbarController.hide()
-        }
-        renameBtn.setOnClickListener {
-            adapter.renameSelectedFile()
-        }
-        deleteBtn.setOnClickListener {
-            adapter.deleteSelectedFiles()
-        }
-        cancelButton.setOnClickListener {
-            adapter.clearSelection()
-        }
-        selectAllBtn.setOnClickListener {
-            adapter.selectAll()
-        }
-        recyclerView.adapter = adapter
+        AlertDialog.Builder(this)
+            .setTitle("Rename")
+            .setView(edit)
+            .setPositiveButton("OK") { _, _ ->
+                val name = edit.text.toString()
+                if (name.isNotBlank())
+                    viewModel.renameFile(file, name)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }
