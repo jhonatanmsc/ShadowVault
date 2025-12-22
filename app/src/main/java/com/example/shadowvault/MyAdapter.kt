@@ -13,6 +13,9 @@ import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shadowvault.models.FileListViewModel
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MyAdapter(
     private val viewModel: FileListViewModel,
@@ -54,6 +57,28 @@ class MyAdapter(
         // UI binding...
         holder.textView.text = file.name
 
+        if (file.isDirectory) {
+            val count = file.listFiles()?.size ?: 0
+            holder.itemsTextView.text = "$count items"
+            holder.imageView.setImageResource(R.drawable.baseline_folder_24)
+        } else {
+            holder.itemsTextView.text = readableFileSize(file.length())
+            holder.dateTextView.text = formatDate(file.lastModified())
+            val ext = file.extension.lowercase(Locale.getDefault())
+            val textExtensions = setOf("txt", "md", "log", "csv", "json", "xml", "html", "htm", "yaml", "yml", "properties")
+            val audioExtentions = setOf("mp3", "wav", "flac", "aac", "ogg", "m4a")
+            if (ext in textExtensions) {
+                holder.imageView.setImageResource(R.drawable.baseline_description_24)
+            } else if (ext == "pdf") {
+                holder.imageView.setImageResource(R.drawable.baseline_article_24)
+            } else if (ext in audioExtentions) {
+                holder.imageView.setImageResource(R.drawable.baseline_music_note_24)
+            } else {
+                holder.imageView.setImageResource(R.drawable.baseline_insert_drive_file_24)
+            }
+
+        }
+
         holder.itemView.setOnClickListener {
             if (selected.isNotEmpty()) {
                 viewModel.toggleSelection(file)
@@ -82,6 +107,19 @@ class MyAdapter(
                 holder.itemView.setBackgroundResource(outValue.resourceId)
             }
         }
+    }
+
+    private fun readableFileSize(size: Long): String {
+        if (size <= 0) return "0 B"
+        val units = arrayOf("B", "KB", "MB", "GB", "TB")
+        val digitGroups = (Math.log10(size.toDouble()) / Math.log10(1024.0)).toInt()
+        return String.format(Locale.getDefault(), "%.1f %s", size / Math.pow(1024.0, digitGroups.toDouble()), units[digitGroups])
+    }
+
+    private fun formatDate(timestamp: Long): String {
+        if (timestamp <= 0L) return ""
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        return sdf.format(Date(timestamp))
     }
 
     private fun openFile(file: File) {
