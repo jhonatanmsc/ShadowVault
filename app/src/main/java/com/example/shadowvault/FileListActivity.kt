@@ -15,13 +15,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shadowvault.models.FileListViewModel
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.shadowvault.factories.FileListViewModelFactory
 import kotlinx.coroutines.launch
 import java.io.File
 
 class FileListActivity : AppCompatActivity() {
-
     private lateinit var taskbarController: TaskbarController
+
     private val viewModel: FileListViewModel by viewModels() {
         FileListViewModelFactory(intent.getStringExtra("path")!!)
     }
@@ -33,6 +34,12 @@ class FileListActivity : AppCompatActivity() {
 
         val path = intent.getStringExtra("path") ?: return
         viewModel.load(path)
+
+        val swipe = findViewById<SwipeRefreshLayout>(R.id.swipe_refresh)
+
+        swipe.setOnRefreshListener {
+            viewModel.load(path)
+        }
 
         val recycler = findViewById<RecyclerView>(R.id.recycler_view)
         val adapter = MyAdapter(viewModel, this)
@@ -54,6 +61,8 @@ class FileListActivity : AppCompatActivity() {
                         adapter.submitList(list)
                         findViewById<TextView>(R.id.nofiles_textview)
                             .visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+
+                        swipe.isRefreshing = false
                     }
                 }
 
@@ -71,6 +80,13 @@ class FileListActivity : AppCompatActivity() {
                         adapter.notifySelectionChanged(selected)
                     }
                 }
+                // observe loading
+                launch {
+                    viewModel.loading.collect { isLoading ->
+                        swipe.isRefreshing = isLoading
+                    }
+                }
+
             }
         }
 

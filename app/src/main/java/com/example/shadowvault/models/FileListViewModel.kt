@@ -1,5 +1,6 @@
 package com.example.shadowvault.models
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -12,6 +13,9 @@ class FileListViewModel(
     private val savedStateHandle: String
 ) : ViewModel() {
 
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading
+
     private val _files = MutableStateFlow<List<File>>(emptyList())
     val files: StateFlow<List<File>> = _files
 
@@ -20,9 +24,14 @@ class FileListViewModel(
 
     fun load(path: String) {
         viewModelScope.launch(Dispatchers.IO) {
+            _loading.value = true
             val root = File(path)
             val list = root.listFiles()?.toList() ?: emptyList()
+            Log.d("FILES", "Recebidos: ${list.size}")
+            Log.d("SWIPE", "emitindo lista: ${list.size}")
+
             _files.value = list
+            _loading.value = false
         }
     }
 
