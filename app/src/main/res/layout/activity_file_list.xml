@@ -18,9 +18,9 @@
             android:id="@+id/top_taskbar_default"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="@android:color/white"
+            android:background="#1F4E79"
             android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
+            android:paddingHorizontal="5dp"
             android:elevation="8dp"
             android:visibility="visible">
 
@@ -29,13 +29,14 @@
                 android:layout_height="50dp"
                 android:layout_marginHorizontal="12dp"
                 android:background="@android:color/transparent"
-                android:src="@drawable/baseline_clear_24"
-                android:contentDescription="Cancel" />
+                android:src="@drawable/baseline_menu_24"
+                android:contentDescription="Menu" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:textColor="@color/white"
                 android:text="@string/no_files_found"/>
 
             <View
@@ -48,8 +49,8 @@
                 android:layout_height="50dp"
                 android:layout_marginHorizontal="12dp"
                 android:background="@android:color/transparent"
-                android:src="@drawable/baseline_select_all_24"
-                android:contentDescription="Select all" />
+                android:src="@drawable/outline_more_vert_24"
+                android:contentDescription="Options" />
 
         </LinearLayout>
 
@@ -130,7 +131,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
-        android:background="@android:color/white"
+        android:background="#9FC4FF"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
         android:elevation="8dp"
