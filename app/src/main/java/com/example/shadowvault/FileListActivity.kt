@@ -47,7 +47,7 @@ class FileListActivity : AppCompatActivity() {
         recycler.adapter = adapter
 
         taskbarController = TaskbarController(
-            topTaskbar = findViewById(R.id.top_taskbar),
+            topTaskbar = findViewById(R.id.top_taskbar_selection),
             bottomTaskbar = findViewById(R.id.bottom_taskbar),
             selectedCountText = findViewById(R.id.selected_count)
         )

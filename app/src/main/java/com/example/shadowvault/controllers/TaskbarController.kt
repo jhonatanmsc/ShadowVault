@@ -2,6 +2,7 @@ package com.example.shadowvault
 
 import android.view.View
 import android.widget.TextView
+import androidx.core.view.isVisible
 
 class TaskbarController(
     private val topTaskbar: View,
@@ -12,7 +13,6 @@ class TaskbarController(
     fun show(selectedCount: Int) {
         selectedCountText.text = "$selectedCount selected"
 
-        // Top
         if (topTaskbar.visibility != View.VISIBLE) {
             topTaskbar.visibility = View.VISIBLE
             topTaskbar.post {
@@ -24,7 +24,6 @@ class TaskbarController(
             }
         }
 
-        // Bottom
         if (bottomTaskbar.visibility != View.VISIBLE) {
             bottomTaskbar.visibility = View.VISIBLE
             bottomTaskbar.post {
@@ -38,8 +37,7 @@ class TaskbarController(
     }
 
     fun hide() {
-        // Top
-        if (topTaskbar.visibility == View.VISIBLE) {
+        if (topTaskbar.isVisible) {
             topTaskbar.animate()
                 .translationY(-topTaskbar.height.toFloat())
                 .setDuration(250)
@@ -47,8 +45,7 @@ class TaskbarController(
                 .start()
         }
 
-        // Bottom
-        if (bottomTaskbar.visibility == View.VISIBLE) {
+        if (bottomTaskbar.isVisible) {
             bottomTaskbar.animate()
                 .translationY(bottomTaskbar.height.toFloat())
                 .setDuration(250)
