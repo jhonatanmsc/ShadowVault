@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:textColor="@color/white"
-                android:text="@string/no_files_found"/>
+                android:text="ShadowVault"/>
 
             <View
                 android:layout_width="0dp"
@@ -131,7 +131,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
-        android:background="#9FC4FF"
+        android:background="#1B3558"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
         android:elevation="8dp"
