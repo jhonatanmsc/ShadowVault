@@ -1,6 +1,7 @@
 package com.example.shadowvault.models
 
 import android.util.Log
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -65,8 +66,12 @@ class FileListViewModel(
             val newFile = File(file.parent, newName)
             if (file.renameTo(newFile)) {
                 _files.value = _files.value.map { if (it == file) newFile else it }
-                _selected.value = setOf(newFile)
+                _selected.value = emptySet()
             }
         }
+    }
+
+    fun sizeSelected(): Int {
+        return _selected.value.size
     }
 }

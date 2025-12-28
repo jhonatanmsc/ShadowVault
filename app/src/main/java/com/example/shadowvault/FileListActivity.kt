@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -99,7 +100,8 @@ class FileListActivity : AppCompatActivity() {
         }
 
         findViewById<ImageButton>(R.id.delete_btn).setOnClickListener {
-            viewModel.deleteSelected()
+            val sel = viewModel.selected.value.firstOrNull() ?: return@setOnClickListener
+            showDeleteDialog(sel)
         }
 
         findViewById<ImageButton>(R.id.rename_btn).setOnClickListener {
@@ -108,8 +110,34 @@ class FileListActivity : AppCompatActivity() {
         }
     }
 
+    private fun showDeleteDialog(file: File) {
+        val selectedItems = viewModel.selected.value
+        if (selectedItems.size > 1) {
+            AlertDialog.Builder(this)
+                .setTitle("${selectedItems.size} items will be deleted, are you sure?")
+                .setPositiveButton("Delete") { _, _ ->
+                    viewModel.deleteSelected()
+                    Toast.makeText(this, "${selectedItems.size} items deleted", Toast.LENGTH_SHORT)
+                        .show()
+                }
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show()
+        } else {
+            AlertDialog.Builder(this)
+                .setTitle("Delete ${file.name}?")
+                .setPositiveButton("Delete") { _, _ ->
+                    viewModel.deleteSelected()
+                    Toast.makeText(this, "${file.name} deleted", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+    }
+
     private fun showRenameDialog(file: File) {
         val edit = EditText(this)
+        val oldName = file.name
         edit.setText(file.name)
 
         AlertDialog.Builder(this)
@@ -117,8 +145,10 @@ class FileListActivity : AppCompatActivity() {
             .setView(edit)
             .setPositiveButton("OK") { _, _ ->
                 val name = edit.text.toString()
-                if (name.isNotBlank())
+                if (name.isNotBlank()) {
                     viewModel.renameFile(file, name)
+                    Toast.makeText(this, "$oldName renamed to ${name}", Toast.LENGTH_SHORT).show()
+                }
             }
             .setNegativeButton("Cancel", null)
             .show()
