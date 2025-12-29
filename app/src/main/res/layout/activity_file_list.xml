@@ -126,63 +126,99 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/bottom_taskbar"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:background="#1B3558"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:elevation="8dp"
-        android:gravity="center_horizontal"
-        android:visibility="gone">
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
 
-        <ImageButton
-            android:id="@+id/copy_btn"
-            android:layout_width="50dp"
+        <LinearLayout
+            android:id="@+id/default_bottom_taskbar"
+            android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginHorizontal="12dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/outline_content_copy_24"
-            android:contentDescription="Copy" />
+            android:background="#1B3558"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:elevation="8dp"
+            android:gravity="center_horizontal"
+            android:visibility="gone">
 
-        <ImageButton
-            android:id="@+id/cut_btn"
-            android:layout_width="50dp"
+            <ImageButton
+                android:id="@+id/copy_btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="12dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/outline_content_copy_24"
+                android:contentDescription="Copy" />
+
+            <ImageButton
+                android:id="@+id/cut_btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="12dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/outline_content_cut_24"
+                android:contentDescription="Cut" />
+
+            <ImageButton
+                android:id="@+id/rename_btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="12dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/baseline_drive_file_rename_outline_24"
+                android:contentDescription="Rename" />
+
+            <ImageButton
+                android:id="@+id/delete_btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="12dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/baseline_delete_24"
+                android:contentDescription="Delete" />
+
+            <ImageButton
+                android:id="@+id/info_btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="12dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/baseline_info_24"
+                android:contentDescription="Info" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/copy_paste_taskbar"
+            android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginHorizontal="12dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/outline_content_cut_24"
-            android:contentDescription="Cut" />
+            android:background="#1B3558"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:elevation="8dp"
+            android:gravity="center_horizontal"
+            android:visibility="gone">
 
-        <ImageButton
-            android:id="@+id/rename_btn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginHorizontal="12dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/baseline_drive_file_rename_outline_24"
-            android:contentDescription="Rename" />
+            <ImageButton
+                android:id="@+id/cancel_copy_btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="12dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/baseline_clear_24"
+                android:contentDescription="Rename" />
 
-        <ImageButton
-            android:id="@+id/delete_btn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginHorizontal="12dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/baseline_delete_24"
-            android:contentDescription="Delete" />
-
-        <ImageButton
-            android:id="@+id/info_btn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginHorizontal="12dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/baseline_info_24"
-            android:contentDescription="Info" />
-
-    </LinearLayout>
+            <ImageButton
+                android:id="@+id/paste_copy_btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="12dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/baseline_content_paste_24"
+                android:contentDescription="Rename" />
+        </LinearLayout>
+    </FrameLayout>
 
 </RelativeLayout>

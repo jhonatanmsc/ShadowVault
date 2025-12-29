@@ -7,6 +7,7 @@ import androidx.core.view.isVisible
 class TaskbarController(
     private val topTaskbar: View,
     private val bottomTaskbar: View,
+    private val copyPasteTaskbar: View,
     private val selectedCountText: TextView
 ) {
 
@@ -50,6 +51,30 @@ class TaskbarController(
                 .translationY(bottomTaskbar.height.toFloat())
                 .setDuration(250)
                 .withEndAction { bottomTaskbar.visibility = View.GONE }
+                .start()
+        }
+    }
+
+    fun show_copy_paste() {
+        hide()
+        if (copyPasteTaskbar.visibility != View.VISIBLE) {
+            copyPasteTaskbar.visibility = View.VISIBLE
+            copyPasteTaskbar.post {
+                copyPasteTaskbar.translationY = copyPasteTaskbar.height.toFloat()
+                copyPasteTaskbar.animate()
+                    .translationY(0f)
+                    .setDuration(250)
+                    .start()
+            }
+        }
+    }
+
+    fun hide_copy_paste() {
+        if (copyPasteTaskbar.isVisible) {
+            copyPasteTaskbar.animate()
+                .translationY(copyPasteTaskbar.height.toFloat())
+                .setDuration(250)
+                .withEndAction { copyPasteTaskbar.visibility = View.GONE }
                 .start()
         }
     }

@@ -42,6 +42,9 @@ class FileListActivity : AppCompatActivity() {
             viewModel.load(path)
         }
 
+        val prop = findViewById<ImageButton>(R.id.info_btn)
+        prop.isEnabled = false
+        prop.alpha = 0.4f
         val recycler = findViewById<RecyclerView>(R.id.recycler_view)
         val adapter = MyAdapter(viewModel, this)
         recycler.layoutManager = LinearLayoutManager(this)
@@ -49,7 +52,8 @@ class FileListActivity : AppCompatActivity() {
 
         taskbarController = TaskbarController(
             topTaskbar = findViewById(R.id.top_taskbar_selection),
-            bottomTaskbar = findViewById(R.id.bottom_taskbar),
+            bottomTaskbar = findViewById(R.id.default_bottom_taskbar),
+            copyPasteTaskbar = findViewById(R.id.copy_paste_taskbar),
             selectedCountText = findViewById(R.id.selected_count)
         )
 
@@ -91,39 +95,69 @@ class FileListActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<ImageButton>(R.id.select_all_btn).setOnClickListener {
-            viewModel.selectAll()
+        val pasteBtn = findViewById<ImageButton>(R.id.paste_copy_btn)
+
+        // copy paste actions
+        findViewById<ImageButton>(R.id.cancel_copy_btn).setOnClickListener {
+            viewModel.clearSelection()
+            taskbarController.hide_copy_paste()
+        }
+        findViewById<ImageButton>(R.id.paste_copy_btn).setOnClickListener {
+            //viewModel.pasteSelected()
+            viewModel.clearSelection()
+            Toast.makeText(this, "Items pasted", Toast.LENGTH_SHORT).show()
+            taskbarController.hide_copy_paste()
         }
 
+        // bottom taskbar actions
         findViewById<ImageButton>(R.id.cancel_btn).setOnClickListener {
             viewModel.clearSelection()
         }
 
-        findViewById<ImageButton>(R.id.delete_btn).setOnClickListener {
-            val sel = viewModel.selected.value.firstOrNull() ?: return@setOnClickListener
-            showDeleteDialog(sel)
+        findViewById<ImageButton>(R.id.select_all_btn).setOnClickListener {
+            viewModel.selectAll()
+        }
+
+        findViewById<ImageButton>(R.id.copy_btn).setOnClickListener {
+            viewModel.clearSelection()
+            taskbarController.show_copy_paste()
+        }
+
+        findViewById<ImageButton>(R.id.cut_btn).setOnClickListener {
+            viewModel.clearSelection()
+            val newPath = intent.getStringExtra("path")
+            if (path == newPath) {
+                pasteBtn.isEnabled = false
+                pasteBtn.alpha = 0.4f
+            }
+            taskbarController.show_copy_paste()
         }
 
         findViewById<ImageButton>(R.id.rename_btn).setOnClickListener {
             val sel = viewModel.selected.value.firstOrNull() ?: return@setOnClickListener
             showRenameDialog(sel)
         }
+
+        findViewById<ImageButton>(R.id.delete_btn).setOnClickListener {
+            showDeleteDialog()
+        }
     }
 
-    private fun showDeleteDialog(file: File) {
-        val selectedItems = viewModel.selected.value
-        if (selectedItems.size > 1) {
+    private fun showDeleteDialog() {
+        val selectedItems = viewModel.sizeSelected()
+        if (selectedItems > 1) {
             AlertDialog.Builder(this)
-                .setTitle("${selectedItems.size} items will be deleted, are you sure?")
+                .setTitle("$selectedItems items will be deleted, are you sure?")
                 .setPositiveButton("Delete") { _, _ ->
                     viewModel.deleteSelected()
-                    Toast.makeText(this, "${selectedItems.size} items deleted", Toast.LENGTH_SHORT)
+                    Toast.makeText(this, "$selectedItems items deleted", Toast.LENGTH_SHORT)
                         .show()
                 }
                 .setNegativeButton("Cancel", null)
                 .create()
                 .show()
         } else {
+            val file = viewModel.selected.value.firstOrNull() ?: return
             AlertDialog.Builder(this)
                 .setTitle("Delete ${file.name}?")
                 .setPositiveButton("Delete") { _, _ ->

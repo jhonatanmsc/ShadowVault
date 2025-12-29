@@ -86,9 +86,7 @@ class MyAdapter(
             }
 
             if (file.isDirectory) {
-                val intent = Intent(activity, FileListActivity::class.java)
-                intent.putExtra("path", file.absolutePath)
-                activity.startActivity(intent)
+                viewModel.load(file.absolutePath)
             } else {
                 openFile(file)
             }
